@@ -7,13 +7,14 @@ import (
 
 	cmds "github.com/ipfs/go-ipfs/commands"
 	config "github.com/ipfs/go-ipfs/repo/config"
+	"gx/ipfs/QmYiqbfRCkryYvJsxBopy77YEhxNZXTmq5Y2qiKyenc59C/go-ipfs-cmdkit"
 
 	manet "gx/ipfs/QmVCNGTyD4EkvNYaAp253uMQ9Rjsjy2oGMvcdJJUoVRfja/go-multiaddr-net"
 	sysi "gx/ipfs/QmZRjKbHa6DenStpQJFiaPcEwkZqrx7TH6xTf342LDU3qM/go-sysinfo"
 )
 
 var sysDiagCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdsutil.HelpText{
 		Tagline: "Print system diagnostic information.",
 		ShortDescription: `
 Prints out information about your computer to aid in easier debugging.
@@ -23,36 +24,36 @@ Prints out information about your computer to aid in easier debugging.
 		info := make(map[string]interface{})
 		err := runtimeInfo(info)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		err = envVarInfo(info)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		err = diskSpaceInfo(info)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		err = memInfo(info)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 		node, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		err = netInfo(node.OnlineMode(), info)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 

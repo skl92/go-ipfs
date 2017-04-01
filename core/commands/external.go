@@ -9,12 +9,13 @@ import (
 	"strings"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	"gx/ipfs/QmYiqbfRCkryYvJsxBopy77YEhxNZXTmq5Y2qiKyenc59C/go-ipfs-cmdkit"
 )
 
 func ExternalBinary() *cmds.Command {
 	return &cmds.Command{
-		Arguments: []cmds.Argument{
-			cmds.StringArg("args", false, true, "Arguments for subcommand."),
+		Arguments: []cmdsutil.Argument{
+			cmdsutil.StringArg("args", false, true, "Arguments for subcommand."),
 		},
 		External: true,
 		Run: func(req cmds.Request, res cmds.Response) {
@@ -33,7 +34,7 @@ func ExternalBinary() *cmds.Command {
 					}
 				}
 
-				res.SetError(fmt.Errorf("%s not installed.", binname), cmds.ErrNormal)
+				res.SetError(fmt.Errorf("%s not installed", binname), cmdsutil.ErrNormal)
 				return
 			}
 
@@ -59,7 +60,7 @@ func ExternalBinary() *cmds.Command {
 
 			err = cmd.Start()
 			if err != nil {
-				res.SetError(fmt.Errorf("failed to start subcommand: %s", err), cmds.ErrNormal)
+				res.SetError(fmt.Errorf("failed to start subcommand: %s", err), cmdsutil.ErrNormal)
 				return
 			}
 
@@ -68,7 +69,7 @@ func ExternalBinary() *cmds.Command {
 			go func() {
 				err = cmd.Wait()
 				if err != nil {
-					res.SetError(err, cmds.ErrNormal)
+					res.SetError(err, cmdsutil.ErrNormal)
 				}
 
 				w.Close()

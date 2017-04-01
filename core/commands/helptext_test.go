@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	cmds "github.com/ipfs/go-ipfs/commands"
+	cmds "gx/ipfs/QmQPnFKriy2hDHMdApoR859ENy2SmptX4wUJuvc1wir3Xt/go-ipfs-cmds"
 )
 
 func checkHelptextRecursive(t *testing.T, name []string, c *cmds.Command) {

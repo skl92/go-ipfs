@@ -9,12 +9,13 @@ import (
 
 	cmds "github.com/ipfs/go-ipfs/commands"
 	"github.com/ipfs/go-ipfs/core"
+	e "github.com/ipfs/go-ipfs/core/commands/e"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/ipfs/go-ipfs/path"
+	"gx/ipfs/QmYiqbfRCkryYvJsxBopy77YEhxNZXTmq5Y2qiKyenc59C/go-ipfs-cmdkit"
 
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
-	u "gx/ipfs/QmZuY8aV7zbNXVy6DyN9SmnuH3o9nG852F4aTiSBpts8d1/go-ipfs-util"
 )
 
 // KeyList is a general type for outputting lists of keys
@@ -24,7 +25,16 @@ type KeyList struct {
 
 // KeyListTextMarshaler outputs a KeyList as plaintext, one key per line
 func KeyListTextMarshaler(res cmds.Response) (io.Reader, error) {
-	output := res.Output().(*KeyList)
+	out, err := unwrapOutput(res.Output())
+	if err != nil {
+		return nil, err
+	}
+
+	output, ok := out.(*KeyList)
+	if !ok {
+		return nil, e.TypeErr(output, out)
+	}
+
 	buf := new(bytes.Buffer)
 	for _, key := range output.Keys {
 		buf.WriteString(key.String() + "\n")
@@ -33,7 +43,7 @@ func KeyListTextMarshaler(res cmds.Response) (io.Reader, error) {
 }
 
 var RefsCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdsutil.HelpText{
 		Tagline: "List links (references) from an object.",
 		ShortDescription: `
 Lists the hashes of all the links an IPFS or IPNS object(s) contains,
@@ -47,50 +57,50 @@ NOTE: List all references recursively by using the flag '-r'.
 	Subcommands: map[string]*cmds.Command{
 		"local": RefsLocalCmd,
 	},
-	Arguments: []cmds.Argument{
-		cmds.StringArg("ipfs-path", true, true, "Path to the object(s) to list refs from.").EnableStdin(),
+	Arguments: []cmdsutil.Argument{
+		cmdsutil.StringArg("ipfs-path", true, true, "Path to the object(s) to list refs from.").EnableStdin(),
 	},
-	Options: []cmds.Option{
-		cmds.StringOption("format", "Emit edges with given format. Available tokens: <src> <dst> <linkname>.").Default("<dst>"),
-		cmds.BoolOption("edges", "e", "Emit edge format: `<from> -> <to>`.").Default(false),
-		cmds.BoolOption("unique", "u", "Omit duplicate refs from output.").Default(false),
-		cmds.BoolOption("recursive", "r", "Recursively list links of child nodes.").Default(false),
+	Options: []cmdsutil.Option{
+		cmdsutil.StringOption("format", "Emit edges with given format. Available tokens: <src> <dst> <linkname>.").Default("<dst>"),
+		cmdsutil.BoolOption("edges", "e", "Emit edge format: `<from> -> <to>`.").Default(false),
+		cmdsutil.BoolOption("unique", "u", "Omit duplicate refs from output.").Default(false),
+		cmdsutil.BoolOption("recursive", "r", "Recursively list links of child nodes.").Default(false),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		unique, _, err := req.Option("unique").Bool()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		recursive, _, err := req.Option("recursive").Bool()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		format, _, err := req.Option("format").String()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		edges, _, err := req.Option("edges").Bool()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 		if edges {
 			if format != "<dst>" {
 				res.SetError(errors.New("using format arguement with edges is not allowed"),
-					cmds.ErrClient)
+					cmdsutil.ErrClient)
 				return
 			}
 
@@ -99,7 +109,7 @@ NOTE: List all references recursively by using the flag '-r'.
 
 		objs, err := objectsForPaths(ctx, n, req.Arguments())
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
@@ -131,7 +141,7 @@ NOTE: List all references recursively by using the flag '-r'.
 }
 
 var RefsLocalCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdsutil.HelpText{
 		Tagline: "List all local references.",
 		ShortDescription: `
 Displays the hashes of all local objects.
@@ -142,14 +152,14 @@ Displays the hashes of all local objects.
 		ctx := req.Context()
 		n, err := req.InvocContext().GetNode()
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
 		// todo: make async
 		allKeys, err := n.Blockstore.AllKeysChan(ctx)
 		if err != nil {
-			res.SetError(err, cmds.ErrNormal)
+			res.SetError(err, cmdsutil.ErrNormal)
 			return
 		}
 
@@ -170,29 +180,21 @@ Displays the hashes of all local objects.
 
 var refsMarshallerMap = cmds.MarshalerMap{
 	cmds.Text: func(res cmds.Response) (io.Reader, error) {
-		outChan, ok := res.Output().(<-chan interface{})
+		v, err := unwrapOutput(res.Output())
+		if err != nil {
+			return nil, err
+		}
+
+		obj, ok := v.(*RefWrapper)
 		if !ok {
-			return nil, u.ErrCast()
+			return nil, e.TypeErr(obj, v)
 		}
 
-		marshal := func(v interface{}) (io.Reader, error) {
-			obj, ok := v.(*RefWrapper)
-			if !ok {
-				return nil, u.ErrCast()
-			}
-
-			if obj.Err != "" {
-				return nil, errors.New(obj.Err)
-			}
-
-			return strings.NewReader(obj.Ref + "\n"), nil
+		if obj.Err != "" {
+			return nil, errors.New(obj.Err)
 		}
 
-		return &cmds.ChannelMarshaler{
-			Channel:   outChan,
-			Marshaler: marshal,
-			Res:       res,
-		}, nil
+		return strings.NewReader(obj.Ref + "\n"), nil
 	},
 }
 

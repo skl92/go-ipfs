@@ -1,6 +1,9 @@
 package commands
 
-import cmds "github.com/ipfs/go-ipfs/commands"
+import (
+	cmds "github.com/ipfs/go-ipfs/commands"
+	"gx/ipfs/QmYiqbfRCkryYvJsxBopy77YEhxNZXTmq5Y2qiKyenc59C/go-ipfs-cmdkit"
+)
 
 type IpnsEntry struct {
 	Name  string
@@ -8,7 +11,7 @@ type IpnsEntry struct {
 }
 
 var NameCmd = &cmds.Command{
-	Helptext: cmds.HelpText{
+	Helptext: cmdsutil.HelpText{
 		Tagline: "Publish and resolve IPNS names.",
 		ShortDescription: `
 IPNS is a PKI namespace, where names are the hashes of public keys, and

@@ -13,7 +13,6 @@ import (
 	"time"
 
 	random "github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/jbenet/go-random"
-	commands "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	corehttp "github.com/ipfs/go-ipfs/core/corehttp"
 	corerouting "github.com/ipfs/go-ipfs/core/corerouting"
@@ -24,6 +23,7 @@ import (
 	ds2 "github.com/ipfs/go-ipfs/thirdparty/datastore2"
 	"github.com/ipfs/go-ipfs/thirdparty/ipfsaddr"
 	unit "github.com/ipfs/go-ipfs/thirdparty/unit"
+	commands "gx/ipfs/QmQPnFKriy2hDHMdApoR859ENy2SmptX4wUJuvc1wir3Xt/go-ipfs-cmds"
 	"gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore"
 	syncds "gx/ipfs/QmRWDav6mzWseLWeYfVd5fvUKiVe9xNH29YfMF438fG364/go-datastore/sync"
 
